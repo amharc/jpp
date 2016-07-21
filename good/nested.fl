@@ -1,0 +1,30 @@
+join = fun
+    (Just (Just x)) => x.
+    _ => Nothing.
+end.
+
+fmap = fun
+    f (Just x) => Just $ f x.
+    _ Nothing => Nothing.
+end.
+
+operator %>>= = fun
+    (Just x) f => f x.
+    Nothing _ => Nothing.
+end.
+
+operator ;<$> = fmap.
+
+safeHead = fun
+    Nil => Nothing.
+    (Cons x _) => Just x.
+end.
+
+pure = Just.
+
+singleton = flip Cons Nil.
+
+main = match pure (singleton $ singleton 42) %>>= safeHead %>>= safeHead with
+    (Just x) => print x.
+    Nothing => fail.
+end.

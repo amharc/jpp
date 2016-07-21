@@ -1,0 +1,3 @@
+main = match Nil with
+    (Cons x y z) => 42.
+end.

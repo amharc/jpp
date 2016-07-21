@@ -1,0 +1,22 @@
+tree = type
+    Leaf : tree 'A.
+    Node : tree 'A -> 'A -> tree 'A -> tree 'A.
+end.
+
+insert = fun
+    val Leaf => Node Leaf val Leaf.
+    val (Node left self right) => match compare val self with
+        Lt => Node (insert val left) self right.
+        Eq => Node left val right.
+        Gt => Node left self (insert val right).
+    end.
+end.
+
+printTree = fun
+    Leaf => ().
+    (Node left val right) => printTree left ; print val ; printTree right.
+end.
+
+empty = Leaf.
+
+main = printTree $ insert 4 $ insert 8 $ insert 1 $ insert 2 $ empty.

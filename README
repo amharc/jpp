@@ -1,0 +1,61 @@
+For now, I hand in only the functional part of my language without GADTs -- the missing features will be added
+in the second iteration.
+
+I have made minor tweaks to the grammar, including:
+  * I now require that constructors start with an uppercase leter.
+  * Type variables should start with an apostrophe "'".
+  * I do not support higher kinded type variables (yet ;).
+  * More operators have been added.
+
+The overview of my solution:
+  * Parsing is done using parsec.
+  * Then the code is type-checked. I use the folklore version of Hindley-Milner inference algorithm
+    called Algorithm M (i.e. with bidirectional type checking). The implementation (e.g. storing
+    the meta type variables as IORefs) is somewhat based on the GHC's own implementation of OutsideIn
+    (and implementations found in various papers of Simon Peyton Jones).
+  * The typechecker allows user-provided type variables, so I need to perform e.g. skolem escape checks.
+  * Arbitrarily nested patterns are supported. Nonexhaustive patterns raise a type-checking error
+    (however, there is a special value "fail" that raises an exception, so the user may just write
+      _ => fail.
+     in case he really needs a partial function). 
+  * I disallow higher-kinded type variables, so kind-checking reduces to mere arity checking.
+  * Bindings in a where-block or at the top-level are (mutually) recursive. Because I use the ordinary
+    Hindley-Milner inference, this may lead to premature unification of type variables, c.f. ocaml:
+       # let rec id x = x
+             and y = id 5
+         in  id true;;
+       Error: This expression has type bool but an expression was expected of type
+         int
+
+    Hence, I resort to a trick used by GHC: I compute strongly connected components (using the Tarjan's
+    algorithm) of a graph whose vertices are the bindings introduced in the same where-block (or
+    at the top-level) and edges represent dependencies. I only check if the binding appears (unshadowed)
+    in the definition of another and not if it is really used, so this forms a somewhat crude approximation.
+    However, if the user encounters a problem with this solution, he may just provide explicit type
+    signatures for the polymorphic functions.
+  * My language features lazy evaluation with call-by-need semantics achieved using thunks. Hence,
+    e.g. there is no if *expression*, but the standard library provides an if *function*.
+    I use the same trick as Simon Peyton Jones in GHC's STG -- while a thunk is being evaluated,
+    it is marked as a blackhole, so if evaluation ever encounters a blackhole an exception is thrown
+    -- the program has certainly entered an infinite loop.
+    I provide a builtin operator ";" which behaves just as Haskell's seq -- reduces its first argument
+    to weak head normal form and returns its second argument (without scrutinising it).
+  * The standard library (included in the stdlib.fl file) is parsed and type-checked in compile-time,
+    using Template Haskell.
+  * The compare function is polymorphic (just as in OCaml) but comparison of functional values raises
+    an exception (again, just as in OCaml).
+  * In some places I have included Liquid Haskell specifications (e.g. when a list in a data-type
+    should be non-empty). However, I did not perform full verification because LH has some problems
+    checking my code. Also: this code fails StgLint on GHC 7.10.3, but it seems to work nevertheless.
+    The relevant GHC's bugs seem to be fixed in GHC 8.0.1-rc4, so in case of any issues switching
+    to GHC 8 may be helpful.
+  * I have included some examples in the good/ and bad/ subdirectories, as requested by the problem statement.
+    Additional typechecker tests can be found in the test/ subdirectory.
+  * Because the example code included in the language declarations made a heavy use of logic programming
+    features I chose not to update it -- sample codes are provided in the good/ subdirectory.
+
+How to build the solution
+  * I have included funlog.cabal and stack.yaml files, so the preferred way is just to use stack.
+  * However, I have also included a Makefile which downloads stack, sets up correct environmental variables
+    required on 'students', downloads and compiles all dependencies and finally builds the interpreter.
+

@@ -1,0 +1,57 @@
+heap = type
+    Empty : heap 'A.
+    Heap : 'A -> list (heap 'A) -> heap 'A.
+end.
+
+operator $: = Cons.
+
+heap_link = fun
+    Empty rhs => rhs.
+    lhs Empty => lhs.
+    (Heap lhsval lhschld) (Heap rhsval rhschld) =>
+        if (lhsval < rhsval)
+            (Heap lhsval (Heap rhsval rhschld $: lhschld))
+            (Heap rhsval (Heap lhsval lhschld $: rhschld)).
+end.
+
+heap_merge = fun
+    Nil => Empty.
+    (Cons heap Nil) => heap.
+    (Cons h1 (Cons h2 hs)) => heap_link (heap_link h1 h2) (heap_merge hs).
+end.
+
+heap_make = fun
+    x => Heap x Nil.
+end.
+
+heap_top = fun
+    (Heap val _) => val.
+    _ => fail.
+end.
+
+heap_pop = fun
+    (Heap _ chld) => heap_merge chld.
+    _ => fail.
+end.
+
+heap_insert = fun
+    val heap => heap_link heap (heap_make val).
+end.
+
+heap_of_list = fun
+    Nil => Empty.
+    (Cons x xs) => heap_insert x $ heap_of_list xs.
+end.
+
+list_of_heap = fun
+    Empty => Nil.
+    x => heap_top x $: list_of_heap (heap_pop x).
+end.
+
+sort = fun
+    list => list_of_heap $ heap_of_list list.
+end.
+
+example = 1 $: -2 $: 30 $: 4 $: 0 $: Nil.
+
+main = print $ sort example.

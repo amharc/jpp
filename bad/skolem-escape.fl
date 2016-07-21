@@ -1,0 +1,8 @@
+x = f ; x.
+
+f = fun 
+    () => ().
+end where
+    y : 'A.
+    y = x.
+end.

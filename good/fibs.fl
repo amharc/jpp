@@ -1,0 +1,7 @@
+fibs = Cons 0 $ Cons 1 $ zipWith (operator +) fibs $ tail fibs.
+
+twice = fun x => x; x. end.
+
+-- Prints only once -- the return value of print has side-effects
+-- but is evaluated only once (call-by-need).
+main = twice $ print $ fibs ! 10000.

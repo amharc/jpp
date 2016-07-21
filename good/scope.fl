@@ -1,0 +1,9 @@
+x = 42.
+
+f = fun
+    y => x.
+end where
+    x = 50.
+end.
+
+main = print $ f ().

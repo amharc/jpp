@@ -1,0 +1,163 @@
+list = type
+    Nil : list 'A.
+    Cons : 'A -> list 'A -> list 'A.
+end.
+
+maybe = type
+    Just : 'A -> maybe 'A.
+    Nothing : maybe 'A.
+end.
+
+either = type
+    Right : 'A -> either 'B 'A.
+    Left : 'A -> either 'A 'B.
+end.
+
+map = fun
+    _ Nil => Nil.
+    f (Cons x xs) => Cons (f x) (map f xs).
+end.
+
+operator $ = fun
+    f x => f x.
+end.
+
+bool = type
+    True : bool.
+    False : bool.
+end.
+
+filter = fun
+    _ Nil => Nil.
+    f (Cons x xs) =>
+        match f x with
+            True => Cons x (filter f xs).
+            False => filter f xs.
+        end.
+end.
+
+natural = type
+    Zero : natural.
+    Succ : natural -> natural.
+end.
+
+head = fun
+    (Cons x _) => x.
+    Nil => fail.
+end.
+
+tail = fun
+    (Cons _ xs) => xs.
+    Nil => fail.
+end.
+
+odd = fun
+    Zero => False.
+    (Succ n) => not $ even n.
+end.
+
+even = fun
+    Zero => True.
+    (Succ n) => not $ odd n.
+end.
+
+not = fun
+    True => False.
+    False => True.
+end.
+
+id = fun
+    x => x.
+end.
+
+const = fun
+    x _ => x.
+end.
+
+operator < = fun x y =>
+    match compare x y with
+        Lt => True.
+        _ => False.
+    end.
+end.
+
+operator > = fun x y =>
+    match compare x y with
+        Gt => True.
+        _ => False.
+    end.
+end.
+
+operator == = fun x y =>
+    match compare x y with
+        Eq => True.
+        _ => False.
+    end.
+end.
+
+operator >= = fun x y =>
+    match compare x y with
+        Lt => False.
+        _ => True.
+    end.
+end.
+
+operator <= = fun x y =>
+    match compare x y with
+        Gt => False.
+        _ => True.
+    end.
+end.
+
+operator \= = fun x y =>
+    match compare x y with
+        Eq => False.
+        _ => True.
+    end.
+end.
+
+operator ! = fun
+    (Cons x _) 0 => x.
+    (Cons _ xs) n => xs ! (n - 1).
+    Nil _ => fail.
+end.
+
+zipWith = fun
+    _ Nil _ => Nil.
+    _ _ Nil => Nil.
+    f (Cons x xs) (Cons y ys) => Cons (f x y) (zipWith f xs ys).
+end.
+
+curry = fun
+    f x y => f (x # y).
+end.
+
+uncurry = fun
+    f (x # y) => f x y.
+end.
+
+undefined = undefined.
+
+join = fun
+    (Just (Just x)) => Just x.
+    _ => Nothing.
+end.
+
+if = fun
+    True x _ => x.
+    False _ x => x.
+end.
+
+flip = fun
+    f x y => f y x.
+end.
+
+foldl = fun
+    _ acc Nil => acc.
+    f acc (Cons x xs) => foldl f (f acc x) xs.
+end.
+
+foldr = fun
+    _ acc Nil => acc.
+    f acc (Cons x xs) => f x (foldr f acc xs).
+end.

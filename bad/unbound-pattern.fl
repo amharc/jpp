@@ -1,0 +1,3 @@
+main = fun
+    DoesNotExist => 1.
+end.

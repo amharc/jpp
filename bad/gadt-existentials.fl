@@ -1,0 +1,3 @@
+foo = type
+    Foo : 'A -> foo.
+end.

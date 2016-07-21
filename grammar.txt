@@ -1,0 +1,95 @@
+Note: this grammar is written in a loose style using regular expression in productions. However, it is easily translatable into parsec.
+
+program ::= (type_or_normal_decl)*.
+
+type_or_normal_decl ::= type_decl | normal_decl.
+
+type_decl ::= identifier "=" "type" (constructor_decl)+ "end".
+
+normal_decl ::= bindable ("="  expression) | ":" type) ".".
+
+constructor_decl ::= constructor ":" type.
+
+type ::= type_no_fun ("->" type_no_fun)*.
+
+type_no_fun ::= type_simple | data_type.
+
+data_type ::= identifier type_simple*.
+
+type_simple ::= variable | "(" type_tuple ")".
+
+type_tuple ::= empty | type ("#" type)*
+
+fun_decl ::= (fun_pattern)+.
+
+fun_pattern ::= multipattern "=>" expression ".".
+
+multipattern ::= (pattern)*.
+
+pattern ::= wildcard | bindable | constructor | literal | "(" pattern_tuple ")".
+
+pattern_tuple ::= empty | complex_pattern ("#" complex_pattern)*.
+
+complex_pattern ::= constructor (pattern)+ (":" type)?.
+
+expression ::= expression_0 (":" type)?.
+
+expression_0 ::= expression_1 (operator_1 expression_1)*.
+
+operator_1 ::= { any operator starting with any of: $ }
+
+expression_1 ::= expression_2 (operator_2 expression_2)*.
+
+operator_2 ::= { any operator starting with any of: , }
+
+expression_2 ::= expression_3 (operator_3 expression_3)*.
+
+operator_3 ::= { any operator starting with any of: ; }
+
+expression_3 ::= expression_4 (operator_4 expression_4)*.
+
+operator_4 ::= { any operator starting with any of: !&|^ }
+
+expression_4 ::= expression_5 (operator_5 expression_5)*.
+
+operator_5 ::= { any operator starting with any of: \\=<> }
+
+expression_5 ::= expression_6 (operator_6 expression_6)*.
+
+operator_6 ::= { any operator starting with any of: +- }
+
+expression_6 ::= expression_7 (operator_7 expression_7)*.
+
+operator_7 ::= { any operator starting with any of: */% }
+
+expression_7 ::= (expression_8)+.  -- call
+
+expression_8 ::= "(" expression_tuple ")" | bindable | literal | constructor | let_expression | match_expression | fun_expression | begin_expression.
+
+expression_tuple ::= empty | expression ("#" expression)*.
+
+let_expression ::= "let" pattern "=" expression "in" expression "end".
+
+match_expression ::= "match" expression "with" (fun_pattern)+ "end".
+
+fun_expression ::= "fun" fun_decl "end" where_block?.
+
+begin_expression ::= "begin" expression "end" where_block?.
+
+where_block ::= "where" normal_decl* "end".
+
+identifier ::= lowercase_letter ident_symbol*.
+
+variable ::= "'" ident_symbol+.
+
+constructor ::= uppercase_letter ident_symbol*.
+
+wildcard ::= "_" ident_symbol*.
+
+ident_symbol ::= lowercase_letter | uppercase_letter | digit | "_".
+
+literal ::= number.
+
+operator ::= operator_1 | operator_2 | operator_3 | operator_4 | operator_5 | operator_6.
+
+bindable ::= identifier | "operator" operator.
